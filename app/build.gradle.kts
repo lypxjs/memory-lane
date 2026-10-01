@@ -1,7 +1,17 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
+
+// Secrets live in local.properties (gitignored) and get baked into BuildConfig.
+// Debug/demo only - never ship a release APK with a baked-in key.
+val localProps = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+val glmApiKey: String = localProps.getProperty("glm.api.key") ?: ""
 
 android {
     namespace = "com.memorylane.tv"
@@ -16,7 +26,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-
+        buildConfigField("String", "GLM_API_KEY", "\"$glmApiKey\"")
     }
 
     buildTypes {
@@ -37,6 +47,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"

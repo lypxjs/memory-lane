@@ -6,8 +6,9 @@ import androidx.activity.compose.setContent
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.memorylane.tv.ai.MockStoryEngine
-import com.memorylane.tv.ai.StoryEngine
+
+
+import com.memorylane.tv.ai.StoryEngines
 import com.memorylane.tv.data.SampleAlbum
 import com.memorylane.tv.ui.PhotoDetailScreen
 import com.memorylane.tv.ui.PhotoGridScreen
@@ -15,10 +16,9 @@ import com.memorylane.tv.ui.theme.MemoryLaneTheme
 
 class MainActivity : ComponentActivity() {
 
-    private val storyEngine: StoryEngine = MockStoryEngine()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val storyEngine = StoryEngines.create(this)
         setContent {
             val navController = rememberNavController()
             MemoryLaneTheme {

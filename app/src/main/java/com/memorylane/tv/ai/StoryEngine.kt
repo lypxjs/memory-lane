@@ -7,12 +7,12 @@ data class Story(
     val text: String,
     val source: Source,
 ) {
-    enum class Source { MOCK, BEDROCK }
+    enum class Source { MOCK, GLM, BEDROCK }
 }
 
 /**
  * Where the narration comes from. The UI only knows this interface, so the
- * Bedrock-backed implementation can be swapped in without touching screens.
+ * engine implementation can be swapped without touching screens.
  */
 interface StoryEngine {
     suspend fun storyFor(photo: Photo): Story
