@@ -108,6 +108,13 @@ fun PhotoDetailScreen(
                     color = Color.White,
                     modifier = Modifier.weight(1f, fill = false),
                 )
+                if (photo.memoryNote != null) {
+                    Text(
+                        text = "Retold from a family recording - the AI only polished the words.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.6f),
+                    )
+                }
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {

@@ -19,9 +19,14 @@ import kotlinx.coroutines.withContext
 /**
  * Narration via Zhipu BigModel GLM (vision-capable, no AWS/credit card needed).
  *
+ * Product rule: the family's memoryNote is the ONLY source of truth. The AI
+ * is a ghostwriter and broadcaster - it retells what a family member actually
+ * recorded, in a warm voice, and it must not invent facts. Without a note
+ * there is no story: the app says so instead of making one up.
+ *
  * Degradation ladder, so the demo never dies on stage:
- *   1. photo attached  -> glm-4v-flash looks at the bitmap and writes the story
- *   2. no photo/failed -> glm-4-flash writes from title + date metadata
+ *   1. photo attached  -> glm-4v-flash retells with the bitmap in view
+ *   2. no photo/failed -> glm-4-flash retells from the note alone
  *   3. network failed  -> falls back to [MockStoryEngine]
  *
  * The API key is injected at build time from local.properties (gitignored).
@@ -34,18 +39,26 @@ class GlmStoryEngine(
 ) : StoryEngine {
 
     override suspend fun storyFor(photo: Photo): Story = withContext(Dispatchers.IO) {
+        val note = photo.memoryNote
+        if (note.isNullOrBlank()) {
+            return@withContext Story(
+                text = "This photo hasn't been told yet. Ask the family to record a " +
+                    "memory for it - the story must be yours, not mine.",
+                source = Story.Source.MOCK,
+            )
+        }
         try {
             val bitmap = photo.assetPath?.let { loadAssetBitmap(context.assets, it, maxDim = 640) }
             if (bitmap != null) {
                 try {
-                    return@withContext requestStory(photo, encodeImage(bitmap), VISION_MODEL)
+                    return@withContext requestStory(photo, note, encodeImage(bitmap), VISION_MODEL)
                 } catch (e: Exception) {
                     android.util.Log.e(TAG, "vision attempt failed, falling to text", e)
                 } finally {
                     bitmap.recycle()
                 }
             }
-            requestStory(photo, imageBase64 = null, model = TEXT_MODEL)
+            requestStory(photo, note, imageBase64 = null, model = TEXT_MODEL)
         } catch (e: Exception) {
             android.util.Log.e(TAG, "text attempt failed, falling to mock", e)
             fallback.storyFor(photo)
@@ -60,6 +73,7 @@ class GlmStoryEngine(
 
     private suspend fun requestStory(
         photo: Photo,
+        memoryNote: String,
         imageBase64: String?,
         model: String,
     ): Story = suspendCancellableCoroutine { cont ->
@@ -74,7 +88,7 @@ class GlmStoryEngine(
         userContent.put(
             JSONObject()
                 .put("type", "text")
-                .put("text", userPrompt(photo))
+                .put("text", userPrompt(photo, memoryNote))
         )
 
         val body = JSONObject()
@@ -86,7 +100,7 @@ class GlmStoryEngine(
                     .put(JSONObject().put("role", "user").put("content", userContent))
             )
             .put("max_tokens", 400)
-            .put("temperature", 0.8)
+            .put("temperature", 0.7)
 
         val conn = URL("https://open.bigmodel.cn/api/paas/v4/chat/completions").openConnection() as HttpURLConnection
         conn.requestMethod = "POST"
@@ -130,14 +144,18 @@ class GlmStoryEngine(
         private const val TEXT_MODEL = "glm-4-flash"
 
         private const val SYSTEM_PROMPT =
-            "You are Memory Lane, a warm family storyteller for a TV photo album. " +
-                "Given a photo (or its title and date), write a 4-6 sentence story in " +
-                "plain, gentle English that an elderly viewer would love to hear while " +
-                "sitting on the couch. Reference what you actually see when a photo is " +
-                "provided. No markdown, no lists, no headings - flowing prose only."
+            "You are the narrator of Memory Lane, a TV photo album for an elderly " +
+                "listener. A family member recorded a true memory about the attached " +
+                "photo. Your job is to RETELL that recorded memory as a warm, spoken " +
+                "story of 4-6 sentences. STRICT RULES: use only facts from the " +
+                "family note and what is actually visible in the photo; never invent " +
+                "people, events, dialogue or details that the note does not mention; " +
+                "no markdown, no lists - flowing, gentle prose an elderly viewer " +
+                "would love to hear from the couch."
 
-        private fun userPrompt(photo: Photo) =
-            "This photo is titled \"${photo.title}\" (${photo.dateLabel}). " +
-                "Tell its story."
+        private fun userPrompt(photo: Photo, memoryNote: String) =
+            "Photo title: \"${photo.title}\" (${photo.dateLabel}). " +
+                "Family memory note (the true story to retell): \"$memoryNote\". " +
+                "Retell it warmly."
     }
 }
