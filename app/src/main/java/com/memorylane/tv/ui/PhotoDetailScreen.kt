@@ -22,7 +22,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.tv.material3.Button
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.memorylane.tv.ai.Story
@@ -112,22 +111,19 @@ fun PhotoDetailScreen(
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Button(onClick = { engineKey++ }) {
-                    Text("Tell me again")
-                }
-                Button(onClick = {
-                    muted = !muted
-                    if (muted) {
-                        tts.stop()
-                    } else {
-                        storyState.value?.text?.let { tts.speak(it) }
-                    }
-                }) {
-                    Text(if (muted) "🔊 Listen" else "🔇 Quiet")
-                }
-                Button(onClick = onBack) {
-                    Text("Back to album")
-                }
+                PillButton(text = "Tell me again", onClick = { engineKey++ })
+                PillButton(
+                    text = if (muted) "🔊 Listen" else "🔇 Quiet",
+                    onClick = {
+                        muted = !muted
+                        if (muted) {
+                            tts.stop()
+                        } else {
+                            storyState.value?.text?.let { tts.speak(it) }
+                        }
+                    },
+                )
+                PillButton(text = "Back to album", onClick = onBack)
             }
         }
     }
