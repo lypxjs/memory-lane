@@ -40,13 +40,14 @@ class GlmStoryEngine(
                 try {
                     return@withContext requestStory(photo, encodeImage(bitmap), VISION_MODEL)
                 } catch (e: Exception) {
-                    // fall through to the text-only attempt
+                    android.util.Log.e(TAG, "vision attempt failed, falling to text", e)
                 } finally {
                     bitmap.recycle()
                 }
             }
             requestStory(photo, imageBase64 = null, model = TEXT_MODEL)
         } catch (e: Exception) {
+            android.util.Log.e(TAG, "text attempt failed, falling to mock", e)
             fallback.storyFor(photo)
         }
     }
@@ -113,6 +114,7 @@ class GlmStoryEngine(
             if (reply.isEmpty()) {
                 cont.resumeWithException(IllegalStateException("GLM empty reply"))
             } else {
+                android.util.Log.i(TAG, "GLM story ok, model=$model, len=${reply.length}")
                 cont.resume(Story(text = reply, source = Story.Source.GLM))
             }
         } catch (e: Exception) {
@@ -123,6 +125,7 @@ class GlmStoryEngine(
     }
 
     companion object {
+        private const val TAG = "GlmStory"
         private const val VISION_MODEL = "glm-4v-flash"
         private const val TEXT_MODEL = "glm-4-flash"
 
