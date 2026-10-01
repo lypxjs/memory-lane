@@ -6,21 +6,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Button
 import androidx.tv.material3.MaterialTheme
@@ -30,8 +30,9 @@ import com.memorylane.tv.ai.StoryEngine
 import com.memorylane.tv.data.Photo
 
 /**
- * One memory, fullscreen: the photo on the left, its AI narration on the right.
- * [engineKey] forces a fresh story when the user taps "Tell me again".
+ * One memory, fullscreen: the photo on the left, its narration on the right.
+ * Stories are SPOKEN via on-device TTS as well as shown - the target viewer
+ * listens from the couch. [engineKey] forces a fresh story on "Tell me again".
  */
 @Composable
 fun PhotoDetailScreen(
@@ -46,12 +47,22 @@ fun PhotoDetailScreen(
         value = storyEngine.storyFor(photo)
     }
 
+    // The soul of the product: stories are spoken, not just shown.
+    val context = LocalContext.current
+    val tts = remember { TtsPlayer(context) }
+    var muted by remember { mutableStateOf(false) }
+    DisposableEffect(Unit) {
+        onDispose { tts.shutdown() }
+    }
+    LaunchedEffect(storyState.value?.text, muted) {
+        val text = storyState.value?.text
+        if (text != null && !muted) tts.speak(text)
+    }
+
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.linearGradient(listOf(photo.colorStart, photo.colorEnd))
-            )
+            .background(Brush.linearGradient(listOf(photo.colorStart, photo.colorEnd)))
             .padding(48.dp),
         horizontalArrangement = Arrangement.spacedBy(48.dp),
     ) {
@@ -76,12 +87,12 @@ fun PhotoDetailScreen(
             Text(
                 text = photo.title,
                 style = MaterialTheme.typography.headlineSmall,
-                color = androidx.compose.ui.graphics.Color.White,
+                color = Color.White,
             )
             Text(
                 text = photo.dateLabel,
                 style = MaterialTheme.typography.titleSmall,
-                color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.75f),
+                color = Color.White.copy(alpha = 0.75f),
             )
 
             val story = storyState.value
@@ -89,13 +100,13 @@ fun PhotoDetailScreen(
                 Text(
                     text = "Memory Lane is writing…",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
+                    color = Color.White.copy(alpha = 0.8f),
                 )
             } else {
                 Text(
                     text = story.text,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = androidx.compose.ui.graphics.Color.White,
+                    color = Color.White,
                     modifier = Modifier.weight(1f, fill = false),
                 )
             }
@@ -103,6 +114,16 @@ fun PhotoDetailScreen(
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Button(onClick = { engineKey++ }) {
                     Text("Tell me again")
+                }
+                Button(onClick = {
+                    muted = !muted
+                    if (muted) {
+                        tts.stop()
+                    } else {
+                        storyState.value?.text?.let { tts.speak(it) }
+                    }
+                }) {
+                    Text(if (muted) "🔊 Listen" else "🔇 Quiet")
                 }
                 Button(onClick = onBack) {
                     Text("Back to album")
