@@ -116,5 +116,14 @@ object SampleAlbum {
             emoji = "🏛️", colorStart = Color(0xff46586a), colorEnd = Color(0xFF95D1CC),
         memoryNote = "London, day three. Grandma's feet hurt but she refused to rest. Standing under this dome she looked up and said: I could look at clever things all day. We let her take the lead for the rest of the trip."
         ),
+        Photo(
+            assetPath = "photos/p01.jpg",
+        id = "p13", title = "Waiting for a Story",
+            dateLabel = "Somewhere worth remembering",
+            emoji = "🎙️", colorStart = Color(0xff2c3e50), colorEnd = Color(0xFF4CA1AF),
+            // The honesty demo: nobody has told this photo's story yet, and the
+            // app says so instead of inventing one. Record a memory to give it a voice.
+        memoryNote = null,
+        ),
     )
 }
