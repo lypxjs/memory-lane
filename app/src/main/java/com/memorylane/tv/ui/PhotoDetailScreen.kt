@@ -37,12 +37,14 @@ import com.memorylane.tv.data.Photo
 fun PhotoDetailScreen(
     photo: Photo,
     storyEngine: StoryEngine,
+    onRecord: () -> Unit,
     onBack: () -> Unit,
 ) {
     var engineKey by remember { mutableStateOf(0) }
 
-    // Cache stories per photo+generation so back-and-forth navigation is instant.
-    val storyState = produceState<Story?>(initialValue = null, photo.id, engineKey) {
+    // Cache stories per photo+note+generation so back-and-forth navigation is
+    // instant, and a freshly recorded family note retells immediately.
+    val storyState = produceState<Story?>(initialValue = null, photo.id, engineKey, photo.memoryNote) {
         value = storyEngine.storyFor(photo)
     }
 
@@ -119,6 +121,7 @@ fun PhotoDetailScreen(
 
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 PillButton(text = "Tell me again", onClick = { engineKey++ })
+                PillButton(text = "🎙 Record a memory", onClick = onRecord)
                 PillButton(
                     text = if (muted) "🔊 Listen" else "🔇 Quiet",
                     onClick = {
