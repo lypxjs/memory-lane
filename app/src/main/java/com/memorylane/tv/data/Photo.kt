@@ -146,5 +146,78 @@ object SampleAlbum {
             emoji = "✈️", colorStart = Color(0xff6a5a2e), colorEnd = Color(0xFFF2D06B),
         memoryNote = "Sister had this portrait taken the week before she moved abroad. She said she wanted us to remember her looking calm. We remember everything else instead."
         ),
+        // ---- The 1931 album: a real family's summer, scanned and donated to
+        // the public domain (Wikimedia Commons, Hungarian family photo album).
+        // Same faces recur across the set - this is the recognition test bed.
+        Photo(
+            assetPath = "photos/p17.jpg",
+        id = "p17", title = "The Portrait",
+            dateLabel = "1931 · Studio",
+            emoji = "🕴️", colorStart = Color(0xff4a4a52), colorEnd = Color(0xFFB9A98F),
+        memoryNote = "Grandpa sat for exactly one portrait the summer of '31. He said photographs were vain. He kept this one in his wallet for forty years anyway."
+        ),
+        Photo(
+            assetPath = "photos/p18.jpg",
+        id = "p18", title = "After the Regatta",
+            dateLabel = "1931 · The Docks",
+            emoji = "⛵", colorStart = Color(0xff3d4c56), colorEnd = Color(0xFF9FB4C7),
+        memoryNote = "Dad and his brother washed the boat after the regatta. Dad claimed he won; the timer said otherwise. Grandma hosed them both down before they came inside."
+        ),
+        Photo(
+            assetPath = "photos/p19.jpg",
+        id = "p19", title = "The Tennis Six",
+            dateLabel = "1931 · The Clay Courts",
+            emoji = "🎾", colorStart = Color(0xff50524e), colorEnd = Color(0xFFC9C2AE),
+        memoryNote = "The tennis six, summer '31. Dad is second from the left, hat pushed back. He made the photographer wait an hour for the good light. That part we believe."
+        ),
+        Photo(
+            assetPath = "photos/p20.jpg",
+        id = "p20", title = "Doubles Champions",
+            dateLabel = "1931 · The Courts",
+            emoji = "🏆", colorStart = Color(0xff56534b), colorEnd = Color(0xFFD6C9A8),
+        memoryNote = "Mom's club won the doubles that August. The trophy was the size of a thimble and she displayed it like a crown for the rest of the season."
+        ),
+        Photo(
+            assetPath = "photos/p21.jpg",
+        id = "p21", title = "Budapest Morning",
+            dateLabel = "1931 · The Danube",
+            emoji = "🌉", colorStart = Color(0xff474f58), colorEnd = Color(0xFFAAB4BE),
+        memoryNote = "Budapest from the Danube bank, one clear morning before the heat. Grandpa walked us along the railing and named every building twice."
+        ),
+        Photo(
+            assetPath = "photos/p22.jpg",
+        id = "p22", title = "The Statue Question",
+            dateLabel = "1931 · Castle Garden",
+            emoji = "🐎", colorStart = Color(0xff4e4b44), colorEnd = Color(0xFFB8AE9C),
+        memoryNote = "The statue in the castle garden. Sister asked what he was riding toward. Nobody had an answer, so she invented one and we let it stand."
+        ),
+        Photo(
+            assetPath = "photos/p23.jpg",
+        id = "p23", title = "The Evening Porch",
+            dateLabel = "1930 · Summer House",
+            emoji = "🪑", colorStart = Color(0xff3f4140), colorEnd = Color(0xFFB0A692),
+        memoryNote = "The porch at the summer house. Dad sat there every evening after tennis, untangling the day. The floorboards creaked their hello."
+        ),
+        Photo(
+            assetPath = "photos/p24.jpg",
+        id = "p24", title = "One More Nail",
+            dateLabel = "1930 · Summer House",
+            emoji = "🔨", colorStart = Color(0xff454846), colorEnd = Color(0xFFAFB4AD),
+        memoryNote = "Dad on the porch, inspecting the roofline. He said it needed one more nail and he was the man to do it. Mom held the ladder and told him not to fall."
+        ),
+        Photo(
+            assetPath = "photos/p25.jpg",
+        id = "p25", title = "New Rackets, Borrowed Hats",
+            dateLabel = "June 1931 · The Courts",
+            emoji = "🎽", colorStart = Color(0xff4c4f52), colorEnd = Color(0xFFC5BFAF),
+        memoryNote = "The five of them at the clay courts in June. New rackets, borrowed hats. They lost every match that day and talked about it for decades."
+        ),
+        Photo(
+            assetPath = "photos/p26.jpg",
+        id = "p26", title = "Striped Suit",
+            dateLabel = "1931 · The Lake",
+            emoji = "🏖️", colorStart = Color(0xff5a5449), colorEnd = Color(0xFFD9C9A3),
+        memoryNote = "Mom on the sand at the lake, in the striped suit Grandma knitted. She said it fit perfectly. The photograph suggests otherwise."
+        ),
     )
 }

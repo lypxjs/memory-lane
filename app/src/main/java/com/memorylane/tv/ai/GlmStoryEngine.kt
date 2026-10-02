@@ -54,13 +54,13 @@ class GlmStoryEngine(
                 .firstOrNull { it.id == m.refPhotoId }
                 ?.assetPath
                 ?.let { path ->
-                    loadAssetBitmap(context.assets, path, maxDim = 320)?.let { bmp ->
+                    loadAssetBitmap(context.assets, path, maxDim = 512)?.let { bmp ->
                         Triple(m.name, encodeImage(bmp), bmp)
                     }
                 }
         }
         try {
-            val bitmap = photo.assetPath?.let { loadAssetBitmap(context.assets, it, maxDim = 640) }
+            val bitmap = photo.assetPath?.let { loadAssetBitmap(context.assets, it, maxDim = 800) }
             if (bitmap != null) {
                 try {
                     val s = requestStory(photo, note, encodeImage(bitmap), VISION_MODEL, refs)
