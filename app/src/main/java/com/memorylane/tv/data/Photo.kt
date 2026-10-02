@@ -125,5 +125,26 @@ object SampleAlbum {
             // app says so instead of inventing one. Record a memory to give it a voice.
         memoryNote = null,
         ),
+        Photo(
+            assetPath = "photos/p14.jpg",
+        id = "p14", title = "Dad and His First Camera",
+            dateLabel = "June 2019 · Back Home",
+            emoji = "📷", colorStart = Color(0xff3a4a5c), colorEnd = Color(0xFF8DA9C4),
+        memoryNote = "Dad, the week he finally admitted he needed glasses. He wore them for the portrait and then declared the camera had gotten worse since his day. We let him believe that."
+        ),
+        Photo(
+            assetPath = "photos/p15.jpg",
+        id = "p15", title = "Mom's Empty-Nest Afternoon",
+            dateLabel = "May 2022 · Home",
+            emoji = "🌼", colorStart = Color(0xff5c4a3a), colorEnd = Color(0xFFE0C3A0),
+        memoryNote = "Mom laughed exactly like this the afternoon we redecorated her kitchen. She said the new curtains were too modern. She picked them herself the next weekend."
+        ),
+        Photo(
+            assetPath = "photos/p16.jpg",
+        id = "p16", title = "Sister Before the Flight",
+            dateLabel = "August 2023 · Studio",
+            emoji = "✈️", colorStart = Color(0xff6a5a2e), colorEnd = Color(0xFFF2D06B),
+        memoryNote = "Sister had this portrait taken the week before she moved abroad. She said she wanted us to remember her looking calm. We remember everything else instead."
+        ),
     )
 }

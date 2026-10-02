@@ -112,6 +112,21 @@ fun PhotoDetailScreen(
                     color = Color.White,
                     modifier = Modifier.weight(1f, fill = false),
                 )
+                if (story.people.isNotEmpty()) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        story.people.forEach { name ->
+                            Text(
+                                text = "👤 $name",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = Color.White,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(50))
+                                    .background(Color.White.copy(alpha = 0.16f))
+                                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                            )
+                        }
+                    }
+                }
                 if (photo.memoryNote != null) {
                     Text(
                         text = "Retold from a family recording - the AI only polished the words.",

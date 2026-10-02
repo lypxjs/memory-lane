@@ -47,18 +47,32 @@ class GlmStoryEngine(
                 source = Story.Source.MOCK,
             )
         }
+        // Family reference faces ride along so the narrator can say "Dad"
+        // instead of "a man". Empty roster -> plain narration, no extra cost.
+        val refs = com.memorylane.tv.data.FamilyStore.snapshot().mapNotNull { m ->
+            com.memorylane.tv.data.SampleAlbum.photos
+                .firstOrNull { it.id == m.refPhotoId }
+                ?.assetPath
+                ?.let { path ->
+                    loadAssetBitmap(context.assets, path, maxDim = 320)?.let { bmp ->
+                        Triple(m.name, encodeImage(bmp), bmp)
+                    }
+                }
+        }
         try {
             val bitmap = photo.assetPath?.let { loadAssetBitmap(context.assets, it, maxDim = 640) }
             if (bitmap != null) {
                 try {
-                    return@withContext requestStory(photo, note, encodeImage(bitmap), VISION_MODEL)
+                    val s = requestStory(photo, note, encodeImage(bitmap), VISION_MODEL, refs)
+                    return@withContext s
                 } catch (e: Exception) {
                     android.util.Log.e(TAG, "vision attempt failed, falling to text", e)
                 } finally {
                     bitmap.recycle()
+                    refs.forEach { it.third.recycle() }
                 }
             }
-            requestStory(photo, note, imageBase64 = null, model = TEXT_MODEL)
+            requestStory(photo, note, imageBase64 = null, model = TEXT_MODEL, familyRefs = refs)
         } catch (e: Exception) {
             android.util.Log.e(TAG, "text attempt failed, falling to mock", e)
             fallback.storyFor(photo)
@@ -76,8 +90,23 @@ class GlmStoryEngine(
         memoryNote: String,
         imageBase64: String?,
         model: String,
+        familyRefs: List<Triple<String, String, Bitmap>> = emptyList(),
     ): Story = suspendCancellableCoroutine { cont ->
         val userContent = JSONArray()
+        // Reference faces first, each labelled, so the model can match the
+        // target photo's faces against the roster by name.
+        for ((name, refB64, _) in familyRefs) {
+            userContent.put(
+                JSONObject()
+                    .put("type", "image_url")
+                    .put("image_url", JSONObject().put("url", "data:image/jpeg;base64,$refB64"))
+            )
+            userContent.put(
+                JSONObject()
+                    .put("type", "text")
+                    .put("text", "Reference photo: this family member is called $name.")
+            )
+        }
         if (imageBase64 != null) {
             userContent.put(
                 JSONObject()
@@ -88,7 +117,7 @@ class GlmStoryEngine(
         userContent.put(
             JSONObject()
                 .put("type", "text")
-                .put("text", userPrompt(photo, memoryNote))
+                .put("text", userPrompt(photo, memoryNote, familyRefs.map { it.first }))
         )
 
         val body = JSONObject()
@@ -129,7 +158,8 @@ class GlmStoryEngine(
                 cont.resumeWithException(IllegalStateException("GLM empty reply"))
             } else {
                 android.util.Log.i(TAG, "GLM story ok, model=$model, len=${reply.length}")
-                cont.resume(Story(text = reply, source = Story.Source.GLM))
+                val (people, storyText) = parsePeopleLine(reply)
+                cont.resume(Story(text = storyText, source = Story.Source.GLM, people = people))
             }
         } catch (e: Exception) {
             if (cont.isActive) cont.resumeWithException(e)
@@ -153,9 +183,33 @@ class GlmStoryEngine(
                 "no markdown, no lists - flowing, gentle prose an elderly viewer " +
                 "would love to hear from the couch."
 
-        private fun userPrompt(photo: Photo, memoryNote: String) =
-            "Photo title: \"${photo.title}\" (${photo.dateLabel}). " +
-                "Family memory note (the true story to retell): \"$memoryNote\". " +
-                "Retell it warmly."
+        private fun userPrompt(photo: Photo, memoryNote: String, familyNames: List<String>): String {
+            val base = "Photo title: \"${photo.title}\" (${photo.dateLabel}). " +
+                "Family memory note (the true story to retell): \"$memoryNote\". "
+            return if (familyNames.isEmpty()) {
+                base + "Retell it warmly."
+            } else {
+                base +
+                    "The images before the last one are reference photos of the family " +
+                    "members: ${familyNames.joinToString(", ")}. The LAST image is the target " +
+                    "photo. FIRST, on its own line, write exactly 'PEOPLE: ' followed by the " +
+                    "names of those family members whose face you recognise in the target " +
+                    "photo (comma-separated, or 'PEOPLE: none' if none). Then retell the " +
+                    "memory warmly, using those names for the people in the photo when the " +
+                    "note mentions them."
+            }
+        }
+
+        /** Splits the structured first line ("PEOPLE: Dad, Sister") off the story. */
+        private fun parsePeopleLine(reply: String): Pair<List<String>, String> {
+            val firstBreak = reply.indexOf('\n')
+            val firstLine = if (firstBreak == -1) reply else reply.substring(0, firstBreak).trim()
+            val rest = if (firstBreak == -1) "" else reply.substring(firstBreak + 1).trim()
+            if (!firstLine.startsWith("PEOPLE:")) return Pair(emptyList(), reply)
+            val names = firstLine.removePrefix("PEOPLE:").split(',', '，')
+                .map { it.trim().trimEnd('.', '。', '!', '！', '?', '？') }
+                .filter { it.isNotEmpty() && !it.equals("none", ignoreCase = true) }
+            return Pair(names, rest.ifBlank { reply })
+        }
     }
 }

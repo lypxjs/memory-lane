@@ -6,6 +6,8 @@ import com.memorylane.tv.data.Photo
 data class Story(
     val text: String,
     val source: Source,
+    /** Family members the narrator recognised in the photo, e.g. ["Dad"]. */
+    val people: List<String> = emptyList(),
 ) {
     enum class Source { MOCK, GLM, BEDROCK }
 }

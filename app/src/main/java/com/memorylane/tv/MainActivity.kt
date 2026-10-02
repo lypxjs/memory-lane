@@ -9,9 +9,11 @@ import androidx.navigation.compose.rememberNavController
 
 
 import com.memorylane.tv.ai.StoryEngines
+import com.memorylane.tv.data.FamilyStore
 import com.memorylane.tv.data.NoteStore
 import com.memorylane.tv.data.Photo
 import com.memorylane.tv.data.SampleAlbum
+import com.memorylane.tv.ui.FamilyScreen
 import com.memorylane.tv.ui.PhotoDetailScreen
 import com.memorylane.tv.ui.PhotoGridScreen
 import com.memorylane.tv.ui.RecordMemoryScreen
@@ -22,6 +24,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         NoteStore.init(this)
+        FamilyStore.init(this)
         val storyEngine = StoryEngines.create(this)
         val apiKey = com.memorylane.tv.BuildConfig.GLM_API_KEY
 
@@ -46,6 +49,7 @@ class MainActivity : ComponentActivity() {
                             onPhotoClick = { photo ->
                                 navController.navigate(Routes.photo(photo.id))
                             },
+                            onFamilyClick = { navController.navigate(Routes.FAMILY) },
                         )
                     }
                     composable(Routes.PHOTO) { entry ->
@@ -75,6 +79,12 @@ class MainActivity : ComponentActivity() {
                                 onBack = { navController.popBackStack() },
                             )
                         }
+                    }
+                    composable(Routes.FAMILY) {
+                        FamilyScreen(
+                            photos = SampleAlbum.photos,
+                            onBack = { navController.popBackStack() },
+                        )
                     }
                 }
             }
