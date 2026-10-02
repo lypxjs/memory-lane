@@ -1,7 +1,9 @@
 package com.memorylane.tv.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -119,7 +121,13 @@ fun PhotoDetailScreen(
                 }
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            // Horizontal scroll keeps every action reachable on narrow phone
+            // screens; on a TV the row fits and the scroll never engages.
+            @Suppress("ComposeModifierMissing")
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+            ) {
                 PillButton(text = "Tell me again", onClick = { engineKey++ })
                 PillButton(text = "🎙 Record a memory", onClick = onRecord)
                 PillButton(
